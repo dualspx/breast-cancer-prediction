@@ -30,69 +30,96 @@
         tr:nth-child(even) {
             background-color: #dddddd;
         }
+
+        .container {
+            flex: 1;
+            border-radius: 10px;
+            border: slategray;
+            border-width: 2px;
+            border-style: solid;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 300px;
+        }
     </style>
 </head>
 <body>
-    <div style="display: flex;">
-        <section id="upload-images" style="flex: 1; border-radius: 10px;">
-            <h1>Upload Images</h1>
-            <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
-                <input type="file" name="image" accept="image/*">
-                <button type="submit">Upload</button>
-                <button type="button" onclick="resetImage()">Reset</button>
-            </form>
-        </section>
-
-        <script>
-            function resetImage() {
-                document.getElementById('upload-form').reset();
-                document.getElementById('result-content').reset();
-            }
-        </script>
-
-        <section id="result" style="flex: 1; border-radius: 10px;">
-            <h1>Result</h1>
-            <div id="result-content"></div>
-        </section>
-
-        <script>
-            // Make an asynchronous request to the /upload API
-            document.querySelector('form').addEventListener('submit', function(event) {
-                event.preventDefault();
-                const formData = new FormData(this);
-
-                fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.text())
-                .then(data => {
-                    // Update the content of the result section
-                    document.getElementById('result-content').innerHTML = data;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            });
-        </script>
-
-        <!-- <script>
-            // Make an asynchronous request to the /upload API
-            fetch('/result')
-                .then(response => response.text())
-                .then(data => {
-                    // Update the content of the result section
-                    document.getElementById('result-content').innerHTML = data;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-
-            // Prevent the form from submitting and redirecting to another page
-            document.querySelector('form').addEventListener('submit', function(event) {
-                event.preventDefault();
-            });
-        </script> -->
+    <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; text-align: center;">
+        <h1>Breast Cancer Prediction using resnet34</h1>
+        <p>Upload an image of a breast cancer cell to get a prediction</p>
+        <br>
+        <br>
     </div>
+    <div style="display: flex;">
+        <div class="container">
+            <section id="upload-images" >
+                <h1>Upload Images</h1>
+                <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+                    <label for="upload-form">Choose an image:</label><br>
+                        <input type="file" name="image" accept="image/*">
+                    <button type="submit">Upload</button>
+                <button type="button" onclick="resetImage()">Reset</button>
+                </form>
+            </section>
+                <br>
+            <img id="imagePreview" src="#" alt="Image Preview" style="display:none; max-width: 100%; height: auto; border-radius: 10px; border: slategray; border-width: 2px; border-style: solid;"/>
+        </div>
+
+        <div class="container">
+            <section id="result">
+            <h1>Result</h1>
+            </section>
+            <div id="result-content" style="width: max-content;">
+                <!-- Result will be displayed here -->
+                <div id="file-name"></div>
+                <br>
+                <div id="prediction"></div>
+            </div>
+            <div id="image" hx-get="/image"></div>
+        </div>
+    </div>
+    <script>
+        // Make an asynchronous request to the /upload API
+        document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update the content of the result section
+            document.getElementById('result-content').innerHTML = "File Name: " + data.file_name + "<br>Prediction: " + data.prediction;
+            // document.getElementById('file-name').innerHTML = "File Name: " + data.file_name;
+            // document.getElementById('prediction').innerHTML = "Prediction: " + data.prediction;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+        });
+
+        function resetImage() {
+            document.getElementById('upload-form').reset();
+            // document.getElementById('result-content').reset();
+        }
+        
+
+        document.getElementById('upload-form').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgElement = document.getElementById('imagePreview');
+                imgElement.src = e.target.result;
+                imgElement.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    </script>
 </body>
 </html>
