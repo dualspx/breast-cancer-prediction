@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Breast Cancer Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.5.0"></script>
+    <style>
+        body{
+            padding: 20px;
+        }
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        tr.htmx-swapping td {
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+        }
+
+        td, th {
+            border: 1px solid #383737;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex;">
+        <section id="upload-images" style="flex: 1; border-radius: 10px;">
+            <h1>Upload Images</h1>
+            <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*">
+                <button type="submit">Upload</button>
+                <button type="button" onclick="resetImage()">Reset</button>
+            </form>
+        </section>
+
+        <script>
+            function resetImage() {
+                document.getElementById('upload-form').reset();
+                document.getElementById('result-content').reset();
+            }
+        </script>
+
+        <section id="result" style="flex: 1; border-radius: 10px;">
+            <h1>Result</h1>
+            <div id="result-content"></div>
+        </section>
+
+        <script>
+            // Make an asynchronous request to the /upload API
+            document.querySelector('form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    // Update the content of the result section
+                    document.getElementById('result-content').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        </script>
+
+        <!-- <script>
+            // Make an asynchronous request to the /upload API
+            fetch('/result')
+                .then(response => response.text())
+                .then(data => {
+                    // Update the content of the result section
+                    document.getElementById('result-content').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+            // Prevent the form from submitting and redirecting to another page
+            document.querySelector('form').addEventListener('submit', function(event) {
+                event.preventDefault();
+            });
+        </script> -->
+    </div>
+</body>
+</html>
