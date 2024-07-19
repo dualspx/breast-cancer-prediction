@@ -72,20 +72,18 @@ def upload():
         image = Image.open(file_image)
         image_tensor = transforms.ToTensor()(image)
         prediction = get_prediction(image_tensor)
+
         prediction_text = 'Malignant' if prediction == 1 else 'Benign'
-        # Normalize the prediction value
+        
         return jsonify(
-                {
-                    'prediction': str(prediction_text),
-                    'file_name': str(file_image.filename),
-                    'file_size': str(len(image_bytes))
-                }
-            )
+            {
+            'prediction': str(prediction_text),
+            'file_name': str(file_image.filename),
+            'file_size': str(len(image_bytes)),
+            'status': 'OK'
+            }
+        ), 200, {'Content-Type': 'application/json'}
     
-@app.route('/image', methods=['GET'])
-def image():
-    # header_image = 'path/to/header_image.jpg'  # Replace with the path to your header image
-    return send_file(image, mimetype='image/jpeg')
 
 @app.route('/result', methods=['GET'])
 def result():
