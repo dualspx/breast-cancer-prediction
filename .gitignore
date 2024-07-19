@@ -1,6 +1,7 @@
 folder/
 dataset/
 dataset1/
+virtualenvname/
 ./dataset.zip
 ./resnet34.zip
 */.venv/
