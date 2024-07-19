@@ -1,0 +1,8 @@
+folder/
+dataset/
+dataset1/
+./dataset.zip
+./resnet34.zip
+*/.venv/
+*/.ipynb_checkpoints/
+*/.vscode/
