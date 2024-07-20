@@ -47,8 +47,8 @@
 </head>
 <body>
     <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; text-align: center;">
-        <h1>Breast Cancer Prediction using resnet34</h1>
-        <p>Upload an image of a breast cancer cell to get a prediction</p>
+        <h1>Breast Cancer Prediction using resnet 34 and resnet50</h1>
+        <p>Upload an image of a breast mammogram to get a prediction</p>
         <br>
         <br>
     </div>
@@ -59,6 +59,15 @@
                 <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
                     <label for="upload-form">Choose an image:</label><br>
                         <input type="file" name="image" accept="image/*">
+                    <br>
+                    <br>
+                    <label for="upload-form">Choose a model:</label><br>
+                        <select id="dropdown" name="model">
+                            <option value="resnet34">resnet34</option>
+                            <option value="resnet50">resnet50</option>
+                        </select>
+                    <br>
+                    <br>
                     <button type="submit">Upload</button>
                 <button type="button" onclick="resetImage()">Reset</button>
                 </form>
@@ -72,12 +81,7 @@
             <h1>Result</h1>
             </section>
             <div id="result-content" style="width: max-content;">
-                <!-- Result will be displayed here -->
-                <div id="file-name"></div>
-                <br>
-                <div id="prediction"></div>
             </div>
-            <div id="image" hx-get="/image"></div>
         </div>
     </div>
     <script>
@@ -93,7 +97,7 @@
         .then(response => response.json())
         .then(data => {
             // Update the content of the result section
-            document.getElementById('result-content').innerHTML = "File Name: " + data.file_name + "<br>Prediction: " + data.prediction;
+            document.getElementById('result-content').innerHTML = "<h1>Model: " + data.model + "</h1>" + "File Name: " + data.file_name + "<br>Prediction: " + data.prediction;
             // document.getElementById('file-name').innerHTML = "File Name: " + data.file_name;
             // document.getElementById('prediction').innerHTML = "Prediction: " + data.prediction;
         })
