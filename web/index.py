@@ -14,8 +14,7 @@ app = Flask(__name__, template_folder=template_dir)
 
 
 def transform_image(image_bytes):
-    my_transforms = transforms.Compose([transforms.Resize(255),
-                                        transforms.CenterCrop(224),
+    my_transforms = transforms.Compose([transforms.Resize(300),
                                         transforms.ToTensor(),
                                         transforms.Normalize(
                                             [0.485, 0.456, 0.406],
@@ -23,15 +22,26 @@ def transform_image(image_bytes):
     image = Image.open(io.BytesIO(image_bytes))
     return my_transforms(image).unsqueeze(0)
 
-def get_prediction(image_tensor):
+def get_prediction(image_tensor, model):
     # Load the ResNet-34 model
     model_path = '../dataset/models'
     if os.path.exists(model_path):
-        model = models.resnet34(pretrained=True)
-        num_features = model.fc.in_features
-        model.fc = nn.Linear(num_features, 1)
-        model.load_state_dict(torch.load(os.path.join(model_path, 'model.pth')), strict=False)
-        model.eval()
+        #initialize model
+        print(model)
+        if model == 'resnet34':
+            model = models.resnet34(pretrained=True)
+            num_features = model.fc.in_features
+            model.fc = nn.Linear(num_features, 1)
+            model.load_state_dict(torch.load(os.path.join(model_path, 'model.pth')), strict=False)
+            model.eval()
+        elif model == 'resnet50':
+            model = models.resnet50(pretrained=True)
+            num_features = model.fc.in_features
+            model.fc = nn.Linear(num_features, 1)
+            model.load_state_dict(torch.load(os.path.join(model_path, 'resnet50.pth')), strict=False)
+            model.eval()
+        else:
+            return 'Model not found'
         # Make prediction
         with torch.no_grad():
             image_pil = transforms.ToPILImage()(image_tensor)
@@ -40,8 +50,8 @@ def get_prediction(image_tensor):
             image_tensor = image_tensor.unsqueeze(0)
             prediction = model(image_tensor)
             predicted = torch.sigmoid(prediction).item()  # Apply sigmoid to get probability
-            # predicted_class = 1 if predicted > 0.5 else 0  # Convert probability to class
-            return predicted
+            predicted_class = 1 if predicted > 0.5 else 0  # Convert probability to class
+            return predicted_class
     else:
         print('Model not found')
     # Convert image to RGB mode
@@ -68,16 +78,20 @@ def upload():
         return jsonify({'error': 'No selected file'})
     
     if file_image:
+        model = request.form['model']
         image_bytes = file_image.read()
         image = Image.open(file_image)
         image_tensor = transforms.ToTensor()(image)
-        prediction = get_prediction(image_tensor)
+        prediction = get_prediction(image_tensor, model)
+        print(prediction)
 
         prediction_text = 'Malignant' if prediction == 1 else 'Benign'
         
         return jsonify(
             {
+            'model': request.form['model'],
             'prediction': str(prediction_text),
+            'prediction_value': str(prediction),
             'file_name': str(file_image.filename),
             'file_size': str(len(image_bytes)),
             'status': 'OK'
